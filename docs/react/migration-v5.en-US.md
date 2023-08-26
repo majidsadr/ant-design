@@ -1,5 +1,8 @@
 ---
-order: 8
+group:
+  title: Migration
+  order: 2
+order: 0
 title: V4 to V5
 ---
 
@@ -23,6 +26,7 @@ This document will help you upgrade from antd `4.x` version to antd `5.x` versio
 - Remove less, adopt CSS-in-JS, for better support of dynamic themes. The bottom layer uses [@ant-design/cssinjs](https://github.com/ant-design/cssinjs) as a solution.
   - All less files are removed, and less variables are no longer exported.
   - Css files are no longer included in package. Since CSS-in-JS supports importing on demand, the original `antd/dist/antd.css` has also been abandoned. If you need to reset some basic styles, please import `antd/dist/reset.css`.
+  - If you need to reset the style of the component, but you don't want to introduce `antd/dist/reset.css` to pollute the global style, You can try using the [App](/components/app) in the outermost layer to solve the problem that native elements do not have antd specification style.
 - Remove css variables and dynamic theme built on top of them.
 - LocaleProvider has been deprecated in 4.x (use `<ConfigProvider locale />` instead), we removed the related folder `antd/es/locale-provider` and `antd/lib/locale-provider` in 5.x.
 - Replace built-in Moment.js with Dayjs. For more: [Use custom date library](/docs/react/use-custom-date-library/).
@@ -121,6 +125,7 @@ This document will help you upgrade from antd `4.x` version to antd `5.x` versio
 
 #### Component refactoring and removal
 
+- Remove `locale-provider` Directory. `LocaleProvider` was removed in v4, please use `ConfigProvider` instead.
 - Move Comment component into `@ant-design/compatible`.
 - Move PageHeader component into `@ant-design/pro-components`.
 
@@ -194,8 +199,8 @@ pnpm --package=@ant-design/codemod-v5 dlx antd5-codemod src
 If you using antd less variables, you can use compatible package to covert it into v4 less variables and use less-loader to inject them:
 
 ```js
-const { theme } = require('antd/lib');
 const { convertLegacyToken } = require('@ant-design/compatible/lib');
+const { theme } = require('antd/lib');
 
 const { defaultAlgorithm, defaultSeed } = theme;
 
@@ -214,7 +219,7 @@ module.exports = {
 };
 ```
 
-Ant then remove antd less reference in your less file:
+And then remove antd less reference in your less file:
 
 ```diff
 // Your less file
@@ -274,6 +279,40 @@ module.exports = {
   plugins: [new AntdMomentWebpackPlugin()],
 };
 ```
+
+### Switch to theme of v4 <Badge>Updated</Badge>
+
+If you don't want the style to change after upgrade, we have provided a v4 theme in `@ant-design/compatible` that can restore v4 style.
+
+````diff
+
+```sandpack
+const sandpackConfig = {
+  dependencies: {
+    '@ant-design/compatible': 'v5-compatible-v4',
+  },
+};
+
+import {
+  defaultTheme,   // Default theme
+  darkTheme,      // Dark theme
+} from '@ant-design/compatible';
+import { ConfigProvider, Button, Radio, Space } from 'antd';
+
+export default () => (
+  <ConfigProvider theme={defaultTheme}>
+    <Space direction="vertical">
+      <Button type="primary">Button</Button>
+      <Radio.Group>
+        <Radio value={1}>A</Radio>
+        <Radio value={2}>B</Radio>
+        <Radio value={3}>C</Radio>
+        <Radio value={4}>D</Radio>
+      </Radio.Group>
+    </Space>
+  </ConfigProvider>
+);
+````
 
 ### Legacy browser support
 

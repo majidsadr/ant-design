@@ -4,13 +4,13 @@ import type { ConfigConsumerProps } from '../config-provider';
 import { ConfigContext } from '../config-provider';
 import Skeleton from '../skeleton';
 import StatisticNumber from './Number';
-import type { FormatConfig, valueType } from './utils';
 import useStyle from './style';
-import Countdown from './Countdown';
+import type { FormatConfig, valueType } from './utils';
 
 export interface StatisticProps extends FormatConfig {
   prefixCls?: string;
   className?: string;
+  rootClassName?: string;
   style?: React.CSSProperties;
   value?: valueType;
   valueStyle?: React.CSSProperties;
@@ -23,14 +23,11 @@ export interface StatisticProps extends FormatConfig {
   onMouseLeave?: React.MouseEventHandler<HTMLDivElement>;
 }
 
-type CompoundedComponent = {
-  Countdown: typeof Countdown;
-};
-
-const Statistic: React.FC<StatisticProps> & CompoundedComponent = (props) => {
+const Statistic: React.FC<StatisticProps> = (props) => {
   const {
     prefixCls: customizePrefixCls,
     className,
+    rootClassName,
     style,
     valueStyle,
     value = 0,
@@ -45,7 +42,8 @@ const Statistic: React.FC<StatisticProps> & CompoundedComponent = (props) => {
     groupSeparator = ',',
   } = props;
 
-  const { getPrefixCls, direction } = React.useContext<ConfigConsumerProps>(ConfigContext);
+  const { getPrefixCls, direction, statistic } =
+    React.useContext<ConfigConsumerProps>(ConfigContext);
 
   const prefixCls = getPrefixCls('statistic', customizePrefixCls);
 
@@ -66,12 +64,19 @@ const Statistic: React.FC<StatisticProps> & CompoundedComponent = (props) => {
     {
       [`${prefixCls}-rtl`]: direction === 'rtl',
     },
+    statistic?.className,
     className,
+    rootClassName,
     hashId,
   );
 
   return wrapSSR(
-    <div className={cls} style={style} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <div
+      className={cls}
+      style={{ ...statistic?.style, ...style }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
       {title && <div className={`${prefixCls}-title`}>{title}</div>}
       <Skeleton paragraph={false} loading={loading} className={`${prefixCls}-skeleton`}>
         <div style={valueStyle} className={`${prefixCls}-content`}>
@@ -87,7 +92,5 @@ const Statistic: React.FC<StatisticProps> & CompoundedComponent = (props) => {
 if (process.env.NODE_ENV !== 'production') {
   Statistic.displayName = 'Statistic';
 }
-
-Statistic.Countdown = Countdown;
 
 export default Statistic;

@@ -2,7 +2,7 @@ import React from 'react';
 import Watermark from '..';
 import mountTest from '../../../tests/shared/mountTest';
 import rtlTest from '../../../tests/shared/rtlTest';
-import { render, waitFor, waitFakeTimer } from '../../../tests/utils';
+import { render, waitFakeTimer, waitFor } from '../../../tests/utils';
 
 describe('Watermark', () => {
   mountTest(Watermark);
@@ -53,7 +53,7 @@ describe('Watermark', () => {
       />,
     );
     const target = container.querySelector<HTMLDivElement>('.watermark div');
-    expect(target?.style.backgroundSize).toBe('600px');
+    expect(target?.style.backgroundSize).toBe('720px');
     expect(container).toMatchSnapshot();
   });
 
@@ -61,6 +61,17 @@ describe('Watermark', () => {
     const { container } = render(
       <Watermark image="https://gw.alipayobjects.com/zos/bmw-prod/59a18171-ae17-4fc5-93a0-2645f64a3aca.svg" />,
     );
+    expect(container).toMatchSnapshot();
+  });
+
+  it('Invalid image watermark', () => {
+    mockSrcSet.mockImplementation(function fn() {
+      this.onerror?.();
+    });
+    const { container } = render(
+      <Watermark className="watermark" content="Ant Design" image="https://test.svg" />,
+    );
+    expect(container.querySelector('.watermark div')).toBeTruthy();
     expect(container).toMatchSnapshot();
   });
 

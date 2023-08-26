@@ -1,7 +1,7 @@
+import { resetComponent, resetIcon } from '../../style';
 import { genCollapseMotion } from '../../style/motion';
 import type { FullToken, GenerateStyle } from '../../theme/internal';
 import { genComponentStyleHook, mergeToken } from '../../theme/internal';
-import { resetComponent, resetIcon } from '../../style';
 
 export interface ComponentToken {}
 
@@ -9,6 +9,8 @@ type CollapseToken = FullToken<'Collapse'> & {
   collapseContentBg: string;
   collapseHeaderBg: string;
   collapseHeaderPadding: string;
+  collapseHeaderPaddingSM: string;
+  collapseHeaderPaddingLG: string;
   collapsePanelBorderRadius: number;
   collapseContentPaddingHorizontal: number;
 };
@@ -21,6 +23,8 @@ export const genBaseStyle: GenerateStyle<CollapseToken> = (token) => {
     collapseContentPaddingHorizontal,
     collapseHeaderBg,
     collapseHeaderPadding,
+    collapseHeaderPaddingSM,
+    collapseHeaderPaddingLG,
     collapsePanelBorderRadius,
 
     lineWidth,
@@ -30,9 +34,12 @@ export const genBaseStyle: GenerateStyle<CollapseToken> = (token) => {
     colorTextHeading,
     colorTextDisabled,
     fontSize,
+    fontSizeLG,
     lineHeight,
     marginSM,
     paddingSM,
+    paddingLG,
+    paddingXS,
     motionDurationSlow,
     fontSizeIcon,
   } = token;
@@ -67,6 +74,7 @@ export const genBaseStyle: GenerateStyle<CollapseToken> = (token) => {
           flexWrap: 'nowrap',
           alignItems: 'flex-start',
           padding: collapseHeaderPadding,
+          paddingInlineStart: paddingSM,
           color: colorTextHeading,
           lineHeight,
           cursor: 'pointer',
@@ -86,6 +94,8 @@ export const genBaseStyle: GenerateStyle<CollapseToken> = (token) => {
             display: 'flex',
             alignItems: 'center',
             paddingInlineEnd: marginSM,
+            // Arrow offset
+            marginInlineStart: padding - paddingSM,
           },
 
           [`${componentCls}-arrow`]: {
@@ -119,12 +129,6 @@ export const genBaseStyle: GenerateStyle<CollapseToken> = (token) => {
             cursor: 'pointer',
           },
         },
-
-        [`&${componentCls}-no-arrow`]: {
-          [`> ${componentCls}-header`]: {
-            paddingInlineStart: paddingSM,
-          },
-        },
       },
 
       [`${componentCls}-content`]: {
@@ -138,6 +142,43 @@ export const genBaseStyle: GenerateStyle<CollapseToken> = (token) => {
 
         [`&-hidden`]: {
           display: 'none',
+        },
+      },
+
+      [`&-small`]: {
+        [`> ${componentCls}-item`]: {
+          [`> ${componentCls}-header`]: {
+            padding: collapseHeaderPaddingSM,
+            paddingInlineStart: paddingXS,
+
+            [`> ${componentCls}-expand-icon`]: {
+              // Arrow offset
+              marginInlineStart: paddingSM - paddingXS,
+            },
+          },
+          [`> ${componentCls}-content > ${componentCls}-content-box`]: {
+            padding: paddingSM,
+          },
+        },
+      },
+
+      [`&-large`]: {
+        [`> ${componentCls}-item`]: {
+          fontSize: fontSizeLG,
+
+          [`> ${componentCls}-header`]: {
+            padding: collapseHeaderPaddingLG,
+            paddingInlineStart: padding,
+
+            [`> ${componentCls}-expand-icon`]: {
+              height: fontSizeLG * lineHeight,
+              // Arrow offset
+              marginInlineStart: paddingLG - padding,
+            },
+          },
+          [`> ${componentCls}-content > ${componentCls}-content-box`]: {
+            padding: paddingLG,
+          },
         },
       },
 
@@ -254,6 +295,8 @@ export default genComponentStyleHook('Collapse', (token) => {
     collapseContentBg: token.colorBgContainer,
     collapseHeaderBg: token.colorFillAlter,
     collapseHeaderPadding: `${token.paddingSM}px ${token.padding}px`,
+    collapseHeaderPaddingSM: `${token.paddingXS}px ${token.paddingSM}px`,
+    collapseHeaderPaddingLG: `${token.padding}px ${token.paddingLG}px`,
     collapsePanelBorderRadius: token.borderRadiusLG,
     collapseContentPaddingHorizontal: 16, // Fixed value
   });

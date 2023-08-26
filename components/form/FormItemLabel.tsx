@@ -3,8 +3,8 @@ import classNames from 'classnames';
 import * as React from 'react';
 import type { ColProps } from '../grid/col';
 import Col from '../grid/col';
-import { useLocaleReceiver } from '../locale/LocaleReceiver';
 import defaultLocale from '../locale/en_US';
+import { useLocale } from '../locale';
 import type { TooltipProps } from '../tooltip';
 import Tooltip from '../tooltip';
 import type { FormContextProps } from './context';
@@ -38,6 +38,9 @@ export interface FormItemLabelProps {
   label?: React.ReactNode;
   labelAlign?: FormLabelAlign;
   labelCol?: ColProps;
+  /**
+   * @internal Used for pass `requiredMark` from `<Form />`
+   */
   requiredMark?: RequiredMark;
   tooltip?: LabelTooltipType;
 }
@@ -53,7 +56,7 @@ const FormItemLabel: React.FC<FormItemLabelProps & { required?: boolean; prefixC
   requiredMark,
   tooltip,
 }) => {
-  const [formLocale] = useLocaleReceiver('Form');
+  const [formLocale] = useLocale('Form');
 
   const {
     vertical,
@@ -81,7 +84,7 @@ const FormItemLabel: React.FC<FormItemLabelProps & { required?: boolean; prefixC
     },
   );
 
-  let labelChildren = label;
+  let labelChildren: React.ReactNode = label;
 
   // Keep label is original where there should have no colon
   const computedColon = colon === true || (contextColon !== false && colon !== false);
@@ -97,7 +100,7 @@ const FormItemLabel: React.FC<FormItemLabelProps & { required?: boolean; prefixC
 
   if (tooltipProps) {
     const { icon = <QuestionCircleOutlined />, ...restTooltipProps } = tooltipProps;
-    const tooltipNode = (
+    const tooltipNode: React.ReactNode = (
       <Tooltip {...restTooltipProps}>
         {React.cloneElement(icon, { className: `${prefixCls}-item-tooltip`, title: '' })}
       </Tooltip>

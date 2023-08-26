@@ -1,8 +1,8 @@
 import type { CSSObject } from '@ant-design/cssinjs';
 import { Keyframes } from '@ant-design/cssinjs';
+import { resetComponent } from '../../style';
 import type { FullToken, GenerateStyle } from '../../theme/internal';
-import { genComponentStyleHook, mergeToken } from '../../theme/internal';
-import { genPresetColor, resetComponent } from '../../style';
+import { genComponentStyleHook, genPresetColor, mergeToken } from '../../theme/internal';
 
 interface BadgeToken extends FullToken<'Badge'> {
   badgeFontHeight: number;
@@ -73,9 +73,12 @@ const genSharedBadgeStyle: GenerateStyle<BadgeToken> = (token: BadgeToken): CSSO
   const ribbonPrefixCls = `${antCls}-ribbon`;
   const ribbonWrapperPrefixCls = `${antCls}-ribbon-wrapper`;
 
-  const statusPreset = genPresetColor(token, (colorKey, { darkColor }) => ({
-    [`${componentCls}-status-${colorKey}`]: {
+  const colorPreset = genPresetColor(token, (colorKey, { darkColor }) => ({
+    [`&${componentCls} ${componentCls}-color-${colorKey}`]: {
       background: darkColor,
+      [`&:not(${componentCls}-count)`]: {
+        color: darkColor,
+      },
     },
   }));
 
@@ -130,6 +133,10 @@ const genSharedBadgeStyle: GenerateStyle<BadgeToken> = (token: BadgeToken): CSSO
 
       [`${componentCls}-multiple-words`]: {
         padding: `0 ${token.paddingXS}px`,
+
+        bdi: {
+          unicodeBidi: 'plaintext',
+        },
       },
 
       [`${componentCls}-dot`]: {
@@ -150,9 +157,9 @@ const genSharedBadgeStyle: GenerateStyle<BadgeToken> = (token: BadgeToken): CSSO
         insetInlineEnd: 0,
         transform: 'translate(50%, -50%)',
         transformOrigin: '100% 0%',
-        [`${iconCls}-spin`]: {
+        [`&${iconCls}-spin`]: {
           animationName: antBadgeLoadingCircle,
-          animationDuration: token.motionDurationMid,
+          animationDuration: '1s',
           animationIterationCount: 'infinite',
           animationTimingFunction: 'linear',
         },
@@ -175,7 +182,7 @@ const genSharedBadgeStyle: GenerateStyle<BadgeToken> = (token: BadgeToken): CSSO
           backgroundColor: token.colorSuccess,
         },
         [`${componentCls}-status-processing`]: {
-          position: 'relative',
+          overflow: 'visible',
           color: token.colorPrimary,
           backgroundColor: token.colorPrimary,
 
@@ -207,13 +214,13 @@ const genSharedBadgeStyle: GenerateStyle<BadgeToken> = (token: BadgeToken): CSSO
         [`${componentCls}-status-warning`]: {
           backgroundColor: token.colorWarning,
         },
-        ...statusPreset,
         [`${componentCls}-status-text`]: {
           marginInlineStart: marginXS,
           color: token.colorText,
           fontSize: token.fontSize,
         },
       },
+      ...colorPreset,
       [`${componentCls}-zoom-appear, ${componentCls}-zoom-enter`]: {
         animationName: antZoomBadgeIn,
         animationDuration: token.motionDurationSlow,
@@ -284,7 +291,6 @@ const genSharedBadgeStyle: GenerateStyle<BadgeToken> = (token: BadgeToken): CSSO
       ...resetComponent(token),
       position: 'absolute',
       top: marginXS,
-      height: badgeFontHeight,
       padding: `0 ${token.paddingXS}px`,
       color: token.colorPrimary,
       lineHeight: `${badgeFontHeight}px`,

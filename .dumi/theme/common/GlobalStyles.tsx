@@ -13,7 +13,9 @@ import {
   PreviewImage,
   Reset,
   Responsive,
+  SearchBar,
 } from './styles';
+import InlineCard from './styles/InlineCard';
 
 const GlobalStyles = () => (
   <>
@@ -28,8 +30,10 @@ const GlobalStyles = () => (
     <Responsive />
     <NProgress />
     <PreviewImage />
+    <InlineCard />
     <ColorStyle />
     <HeadingAnchor />
+    <SearchBar />
   </>
 );
 

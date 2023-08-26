@@ -1,15 +1,17 @@
+'use client';
+
 import VerticalAlignTopOutlined from '@ant-design/icons/VerticalAlignTopOutlined';
 import classNames from 'classnames';
 import CSSMotion from 'rc-motion';
 import omit from 'rc-util/lib/omit';
 import * as React from 'react';
-import type { ConfigConsumerProps } from '../config-provider';
-import { ConfigContext } from '../config-provider';
 import getScroll from '../_util/getScroll';
 import { cloneElement } from '../_util/reactNode';
 import scrollTo from '../_util/scrollTo';
 import throttleByAnimationFrame from '../_util/throttleByAnimationFrame';
 import warning from '../_util/warning';
+import type { ConfigConsumerProps } from '../config-provider';
+import { ConfigContext } from '../config-provider';
 import useStyle from './style';
 
 export interface BackTopProps {
@@ -19,6 +21,7 @@ export interface BackTopProps {
   prefixCls?: string;
   children?: React.ReactNode;
   className?: string;
+  rootClassName?: string;
   style?: React.CSSProperties;
   duration?: number;
 }
@@ -26,7 +29,8 @@ export interface BackTopProps {
 const BackTop: React.FC<BackTopProps> = (props) => {
   const {
     prefixCls: customizePrefixCls,
-    className = '',
+    className,
+    rootClassName,
     visibilityHeight = 400,
     target,
     onClick,
@@ -79,12 +83,14 @@ const BackTop: React.FC<BackTopProps> = (props) => {
       [`${prefixCls}-rtl`]: direction === 'rtl',
     },
     className,
+    rootClassName,
   );
 
   // fix https://fb.me/react-unknown-prop
   const divProps = omit(props, [
     'prefixCls',
     'className',
+    'rootClassName',
     'children',
     'visibilityHeight',
     'target',
@@ -115,4 +121,4 @@ if (process.env.NODE_ENV !== 'production') {
   BackTop.displayName = 'BackTop';
 }
 
-export default React.memo(BackTop);
+export default BackTop;

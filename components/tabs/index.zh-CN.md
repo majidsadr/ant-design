@@ -4,6 +4,7 @@ subtitle: 标签页
 group: 数据展示
 title: Tabs
 cover: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*72NDQqXkyOEAAAAAAAAAAAAADrJ8AQ/original
+coverDark: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*8HMoTZUoSGoAAAAAAAAAAAAADrJ8AQ/original
 ---
 
 选项卡切换组件。
@@ -37,8 +38,11 @@ Ant Design 依次提供了三级选项卡，分别用于不同的场景。
 <code src="./demo/custom-tab-bar-node.tsx">可拖拽标签</code>
 <code src="./demo/animated.tsx" debug>动画</code>
 <code src="./demo/nest.tsx" debug>嵌套</code>
+<code src="./demo/component-token.tsx" debug>组件 Token</code>
 
 ## API
+
+通用属性参考：[通用属性](/docs/react/common-props)
 
 ### Tabs
 
@@ -46,7 +50,7 @@ Ant Design 依次提供了三级选项卡，分别用于不同的场景。
 | --- | --- | --- | --- | --- |
 | activeKey | 当前激活 tab 面板的 key | string | - |  |
 | addIcon | 自定义添加按钮 | ReactNode | - | 4.4.0 |
-| animated | 是否使用动画切换 Tabs, 仅生效于 `tabPosition="top"` | boolean\| { inkBar: boolean, tabPane: boolean } | { inkBar: true, tabPane: false } |  |
+| animated | 是否使用动画切换 Tabs | boolean\| { inkBar: boolean, tabPane: boolean } | { inkBar: true, tabPane: false } |  |
 | centered | 标签居中展示 | boolean | false | 4.4.0 |
 | defaultActiveKey | 初始化选中面板的 key，如果没有设置 activeKey | string | `第一个面板` |  |
 | hideAdd | 是否隐藏加号图标，在 `type="editable-card"` 时有效 | boolean | false |  |
@@ -70,11 +74,15 @@ Ant Design 依次提供了三级选项卡，分别用于不同的场景。
 
 ### TabItemType
 
-| 参数        | 说明                                            | 类型      | 默认值 |
-| ----------- | ----------------------------------------------- | --------- | ------ |
-| closeIcon   | 自定义关闭图标，`在 type="editable-card"`时有效 | ReactNode | -      |
-| disabled    | 禁用某一项                                      | boolean   | false  |
-| forceRender | 被隐藏时是否渲染 DOM 结构                       | boolean   | false  |
-| key         | 对应 activeKey                                  | string    | -      |
-| label       | 选项卡头显示文字                                | ReactNode | -      |
-| children    | 选项卡头显示内容                                | ReactNode | -      |
+| 参数 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| closeIcon | 自定义关闭图标，在 `type="editable-card"` 时有效。5.7.0：设置为 `null` 或 `false` 时隐藏关闭按钮 | boolean \| ReactNode | - |
+| disabled | 禁用某一项 | boolean | false |
+| forceRender | 被隐藏时是否渲染 DOM 结构 | boolean | false |
+| key | 对应 activeKey | string | - |
+| label | 选项卡头显示文字 | ReactNode | - |
+| children | 选项卡头显示内容 | ReactNode | - |
+
+## Design Token
+
+<ComponentTokenTable component="Tabs"></ComponentTokenTable>

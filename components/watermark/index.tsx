@@ -1,13 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import MutateObserver from '@rc-component/mutate-observer';
-import { getStyleStr, getPixelRatio, rotateWatermark, reRendering } from './utils';
 
-/**
- * Base size of the canvas, 1 for parallel layout and 2 for alternate layout
- * Only alternate layout is currently supported
- */
-const BaseSize = 2;
-const FontGap = 3;
+import MutateObserver from '@rc-component/mutate-observer';
+import classNames from 'classnames';
+
+import theme from '../theme';
+import useClips, { FontGap } from './useClips';
+import { getPixelRatio, getStyleStr, reRendering } from './utils';
 
 export interface WatermarkProps {
   zIndex?: number;
@@ -25,6 +23,7 @@ export interface WatermarkProps {
   };
   style?: React.CSSProperties;
   className?: string;
+  rootClassName?: string;
   gap?: [number, number];
   offset?: [number, number];
   children?: React.ReactNode;
@@ -45,14 +44,15 @@ const Watermark: React.FC<WatermarkProps> = (props) => {
     font = {},
     style,
     className,
+    rootClassName,
     gap = [100, 100],
     offset,
     children,
   } = props;
-
+  const { token } = theme.useToken();
   const {
-    color = 'rgba(0,0,0,.15)',
-    fontSize = 16,
+    color = token.colorFill,
+    fontSize = token.fontSizeLG,
     fontWeight = 'normal',
     fontStyle = 'normal',
     fontFamily = 'sans-serif',
@@ -113,7 +113,7 @@ const Watermark: React.FC<WatermarkProps> = (props) => {
         getStyleStr({
           ...getMarkStyle(),
           backgroundImage: `url('${base64Url}')`,
-          backgroundSize: `${(gapX + markWidth) * BaseSize}px`,
+          backgroundSize: `${Math.floor(markWidth)}px`,
         }),
       );
       containerRef.current?.append(watermarkRef.current);
@@ -134,32 +134,20 @@ const Watermark: React.FC<WatermarkProps> = (props) => {
     if (!image && ctx.measureText) {
       ctx.font = `${Number(fontSize)}px ${fontFamily}`;
       const contents = Array.isArray(content) ? content : [content];
-      const widths = contents.map((item) => ctx.measureText(item!).width);
-      defaultWidth = Math.ceil(Math.max(...widths));
-      defaultHeight = Number(fontSize) * contents.length + (contents.length - 1) * FontGap;
+      const sizes = contents.map((item) => {
+        const metrics = ctx.measureText(item!);
+
+        return [metrics.width, metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent];
+      });
+      defaultWidth = Math.ceil(Math.max(...sizes.map((size) => size[0])));
+      defaultHeight =
+        Math.ceil(Math.max(...sizes.map((size) => size[1]))) * contents.length +
+        (contents.length - 1) * FontGap;
     }
     return [width ?? defaultWidth, height ?? defaultHeight] as const;
   };
 
-  const fillTexts = (
-    ctx: CanvasRenderingContext2D,
-    drawX: number,
-    drawY: number,
-    drawWidth: number,
-    drawHeight: number,
-  ) => {
-    const ratio = getPixelRatio();
-    const mergedFontSize = Number(fontSize) * ratio;
-    ctx.font = `${fontStyle} normal ${fontWeight} ${mergedFontSize}px/${drawHeight}px ${fontFamily}`;
-    ctx.fillStyle = color;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.translate(drawWidth / 2, 0);
-    const contents = Array.isArray(content) ? content : [content];
-    contents?.forEach((item, index) => {
-      ctx.fillText(item ?? '', drawX, drawY + index * (mergedFontSize + FontGap * ratio));
-    });
-  };
+  const getClips = useClips();
 
   const renderWatermark = () => {
     const canvas = document.createElement('canvas');
@@ -172,46 +160,43 @@ const Watermark: React.FC<WatermarkProps> = (props) => {
 
       const ratio = getPixelRatio();
       const [markWidth, markHeight] = getMarkSize(ctx);
-      const canvasWidth = (gapX + markWidth) * ratio;
-      const canvasHeight = (gapY + markHeight) * ratio;
-      canvas.setAttribute('width', `${canvasWidth * BaseSize}px`);
-      canvas.setAttribute('height', `${canvasHeight * BaseSize}px`);
 
-      const drawX = (gapX * ratio) / 2;
-      const drawY = (gapY * ratio) / 2;
-      const drawWidth = markWidth * ratio;
-      const drawHeight = markHeight * ratio;
-      const rotateX = (drawWidth + gapX * ratio) / 2;
-      const rotateY = (drawHeight + gapY * ratio) / 2;
-      /** Alternate drawing parameters */
-      const alternateDrawX = drawX + canvasWidth;
-      const alternateDrawY = drawY + canvasHeight;
-      const alternateRotateX = rotateX + canvasWidth;
-      const alternateRotateY = rotateY + canvasHeight;
+      const drawCanvas = (
+        drawContent?: NonNullable<WatermarkProps['content']> | HTMLImageElement,
+      ) => {
+        const [textClips, clipWidth] = getClips(
+          drawContent || '',
+          rotate,
+          ratio,
+          markWidth,
+          markHeight,
+          {
+            color,
+            fontSize,
+            fontStyle,
+            fontWeight,
+            fontFamily,
+          },
+          gapX,
+          gapY,
+        );
 
-      ctx.save();
-      rotateWatermark(ctx, rotateX, rotateY, rotate);
+        appendWatermark(textClips, clipWidth);
+      };
 
       if (image) {
         const img = new Image();
         img.onload = () => {
-          ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-          /** Draw interleaved pictures after rotation */
-          ctx.restore();
-          rotateWatermark(ctx, alternateRotateX, alternateRotateY, rotate);
-          ctx.drawImage(img, alternateDrawX, alternateDrawY, drawWidth, drawHeight);
-          appendWatermark(canvas.toDataURL(), markWidth);
+          drawCanvas(img);
+        };
+        img.onerror = () => {
+          drawCanvas(content);
         };
         img.crossOrigin = 'anonymous';
         img.referrerPolicy = 'no-referrer';
         img.src = image;
       } else {
-        fillTexts(ctx, drawX, drawY, drawWidth, drawHeight);
-        /** Fill the interleaved text after rotation */
-        ctx.restore();
-        rotateWatermark(ctx, alternateRotateX, alternateRotateY, rotate);
-        fillTexts(ctx, alternateDrawX, alternateDrawY, drawWidth, drawHeight);
-        appendWatermark(canvas.toDataURL(), markWidth);
+        drawCanvas(content);
       }
     }
   };
@@ -248,7 +233,11 @@ const Watermark: React.FC<WatermarkProps> = (props) => {
 
   return (
     <MutateObserver onMutate={onMutate}>
-      <div ref={containerRef} className={className} style={{ position: 'relative', ...style }}>
+      <div
+        ref={containerRef}
+        className={classNames(className, rootClassName)}
+        style={{ position: 'relative', ...style }}
+      >
         {children}
       </div>
     </MutateObserver>

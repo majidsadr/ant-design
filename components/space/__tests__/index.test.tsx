@@ -197,4 +197,59 @@ describe('Space', () => {
     );
     spy.mockRestore();
   });
+
+  it('should render the hidden empty item wrapper', () => {
+    const Null = () => null;
+    const { container } = render(
+      <Space>
+        <Null />
+      </Space>,
+    );
+    const item = container.querySelector('div.ant-space-item') as HTMLElement;
+
+    expect(item).toBeEmptyDOMElement();
+    expect(getComputedStyle(item).display).toBe('none');
+  });
+
+  it('should ref work', () => {
+    const ref = React.createRef<HTMLDivElement>();
+    const { container } = render(
+      <Space ref={ref}>
+        <span>Text1</span>
+        <span>Text2</span>
+      </Space>,
+    );
+
+    expect(ref.current).toBe(container.firstChild);
+  });
+
+  it('should classNames work', () => {
+    const { container } = render(
+      <Space classNames={{ item: 'test-classNames' }}>
+        <span>Text1</span>
+        <span>Text2</span>
+      </Space>,
+    );
+
+    expect(container.querySelector('.ant-space-item.test-classNames')).toBeTruthy();
+  });
+
+  it('should styles work', () => {
+    const { container } = render(
+      <Space
+        styles={{
+          item: {
+            color: 'red',
+          },
+        }}
+      >
+        <span>Text1</span>
+        <span>Text2</span>
+      </Space>,
+    );
+
+    expect(container.querySelector('.ant-space-item')?.getAttribute('style')).toEqual(
+      'margin-right: 8px; color: red;',
+    );
+  });
 });
